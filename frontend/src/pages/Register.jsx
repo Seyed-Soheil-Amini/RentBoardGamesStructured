@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Gamepad2, ArrowRight, Store, User } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { Gamepad2, ArrowRight, ArrowLeft, Store, User } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const { register } = useAuth();
+  const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -29,9 +31,11 @@ const Register = () => {
     if (success) {
       navigate('/dashboard');
     } else {
-      setError('Registration failed. Username might be taken.');
+      setError(t.auth.registrationFailed);
     }
   };
+
+  const ActionArrow = isRTL ? ArrowLeft : ArrowRight;
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center py-10">
@@ -46,8 +50,8 @@ const Register = () => {
             </div>
           </div>
           
-          <h2 className="text-3xl font-bold text-center text-white mb-2">Join the Network</h2>
-          <p className="text-slate-400 text-center mb-8">Choose your path and start sharing.</p>
+          <h2 className="text-3xl font-bold text-center text-white mb-2">{t.auth.registerTitle}</h2>
+          <p className="text-slate-400 text-center mb-8">{t.auth.registerSubtitle}</p>
           
           {error && (
             <div className="bg-rose-500/20 border border-rose-500/50 text-rose-300 px-4 py-3 rounded-lg mb-6 text-sm text-center">
@@ -56,70 +60,78 @@ const Register = () => {
           )}
           
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div 
-                onClick={() => handleRoleSelect('RENTER')}
-                className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-300 ${formData.role === 'RENTER' ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-slate-900/40 border-slate-700 text-slate-400 hover:border-slate-500'}`}
-              >
-                <User className="w-6 h-6" />
-                <span className="font-medium">Renter</span>
-              </div>
-              <div 
-                onClick={() => handleRoleSelect('CAFE_PARTNER')}
-                className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-300 ${formData.role === 'CAFE_PARTNER' ? 'bg-fuchsia-600/20 border-fuchsia-500 text-white' : 'bg-slate-900/40 border-slate-700 text-slate-400 hover:border-slate-500'}`}
-              >
-                <Store className="w-6 h-6" />
-                <span className="font-medium">Cafe Partner</span>
+            <div className="space-y-2 mb-6">
+              <label className="text-xs font-semibold uppercase text-slate-400 tracking-wider">
+                {t.auth.roleSelectorTitle}
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div 
+                  onClick={() => handleRoleSelect('RENTER')}
+                  className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-300 ${formData.role === 'RENTER' ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-slate-900/40 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                >
+                  <User className="w-6 h-6" />
+                  <span className="font-medium text-sm">{t.auth.renterRole}</span>
+                </div>
+                <div 
+                  onClick={() => handleRoleSelect('CAFE_PARTNER')}
+                  className={`cursor-pointer border rounded-xl p-4 flex flex-col items-center gap-2 transition-all duration-300 ${formData.role === 'CAFE_PARTNER' ? 'bg-fuchsia-600/20 border-fuchsia-500 text-white' : 'bg-slate-900/40 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                >
+                  <Store className="w-6 h-6" />
+                  <span className="font-medium text-sm">{t.auth.cafePartnerRole}</span>
+                </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Username</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">{t.auth.username}</label>
               <input 
                 type="text" 
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
                 className="glass-input w-full px-4 py-3 rounded-xl outline-none"
-                placeholder="Choose a username"
+                placeholder={t.auth.usernamePlaceholder}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">{t.auth.email}</label>
               <input 
                 type="email" 
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
                 className="glass-input w-full px-4 py-3 rounded-xl outline-none"
-                placeholder="you@example.com"
+                placeholder={t.auth.emailPlaceholder}
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">{t.auth.password}</label>
               <input 
                 type="password" 
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
                 className="glass-input w-full px-4 py-3 rounded-xl outline-none"
-                placeholder="Create a strong password"
+                placeholder={t.auth.passwordPlaceholder}
                 required
               />
             </div>
             
             <button type="submit" className="glass-button w-full py-3 rounded-xl flex items-center justify-center gap-2 mt-6 group">
-              <span>Create Account</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{t.auth.registerBtn}</span>
+              <ActionArrow className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
           
           <div className="mt-8 text-center text-sm text-slate-400">
-            Already a member? <Link to="/login" className="text-fuchsia-400 hover:text-fuchsia-300 font-medium ml-1">Sign in</Link>
+            {t.auth.alreadyAccount}{' '}
+            <Link to="/login" className="text-fuchsia-400 hover:text-fuchsia-300 font-medium ml-1">
+              {t.auth.signInLink}
+            </Link>
           </div>
         </div>
       </div>

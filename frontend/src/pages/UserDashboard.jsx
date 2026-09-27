@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Wallet, Package, Clock, ShieldCheck, Gamepad2, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user, refreshWallet } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('CATALOG');
   const [inventory, setInventory] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -42,20 +44,21 @@ const UserDashboard = () => {
       setIsTopupModalOpen(false);
       setTopupAmount('');
       refreshWallet();
+      alert(t.userDashboard.topupSuccess);
     } catch (error) {
-      alert('Topup failed. Please enter a valid amount.');
+      alert(t.userDashboard.topupFailed);
     }
   };
 
   const handleBook = async (itemId) => {
     try {
       await axios.post('/api/rentals/book/', { inventory_item_id: itemId });
-      alert('Rental booked successfully!');
+      alert(t.userDashboard.bookingSuccess);
       fetchInventory();
       fetchRentals();
       refreshWallet();
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to book rental.');
+      alert(error.response?.data?.error || t.userDashboard.bookingFailed);
     }
   };
 
@@ -66,6 +69,12 @@ const UserDashboard = () => {
   const activeRentals = rentals.filter(r => ['RESERVED', 'PICKED_UP'].includes(r.status));
   const historyRentals = rentals.filter(r => ['RETURNED_SAFE', 'RETURNED_DAMAGED'].includes(r.status));
 
+  const tabList = [
+    { id: 'CATALOG', label: t.userDashboard.tabs.catalog },
+    { id: 'ACTIVE_RENTALS', label: t.userDashboard.tabs.activeRentals },
+    { id: 'HISTORY', label: t.userDashboard.tabs.history },
+  ];
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       
@@ -74,18 +83,18 @@ const UserDashboard = () => {
         <div className="glass-panel p-6 rounded-2xl flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-200 flex items-center gap-2 mb-2">
-              <Wallet className="w-5 h-5 text-emerald-400" /> Wallet Balance
+              <Wallet className="w-5 h-5 text-emerald-400" /> {t.userDashboard.walletBalance}
             </h2>
             <div className="text-4xl font-bold text-white">${user?.profile?.wallet_balance || '0.00'}</div>
             <div className="text-sm text-slate-400 mt-1">
-              Escrow Held: ${user?.profile?.escrow_balance || '0.00'}
+              {t.userDashboard.escrowHeld} ${user?.profile?.escrow_balance || '0.00'}
             </div>
           </div>
           <button 
             onClick={() => setIsTopupModalOpen(true)}
             className="glass-button px-6 py-3 rounded-xl flex items-center gap-2"
           >
-            Add Funds
+            {t.userDashboard.addFunds}
           </button>
         </div>
 
@@ -93,30 +102,30 @@ const UserDashboard = () => {
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-fuchsia-500/20 blur-3xl rounded-full"></div>
           <div className="relative z-10">
             <h2 className="text-xl font-semibold text-slate-200 flex items-center gap-2 mb-2">
-              <ShieldCheck className="w-5 h-5 text-fuchsia-400" /> Active Plan
+              <ShieldCheck className="w-5 h-5 text-fuchsia-400" /> {t.userDashboard.activePlan}
             </h2>
             <div className="text-2xl font-bold text-white uppercase tracking-wider">
               {user?.profile?.subscription_tier?.name || 'BASIC'}
             </div>
             <div className="text-sm text-slate-400 mt-1">
-              {user?.profile?.subscription_tier?.free_days || 3} Free Days included
+              {user?.profile?.subscription_tier?.free_days || 3} {t.userDashboard.freeDaysIncluded}
             </div>
           </div>
           <button className="bg-slate-700/50 hover:bg-slate-600/50 text-slate-200 border border-slate-600 px-6 py-3 rounded-xl transition-colors z-10">
-            Upgrade Plan
+            {t.userDashboard.upgradePlan}
           </button>
         </div>
       </section>
 
       {/* Tabs */}
       <div className="flex space-x-4 border-b border-slate-700 pb-2">
-        {['CATALOG', 'ACTIVE_RENTALS', 'HISTORY'].map(tab => (
+        {tabList.map(tab => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === tab ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 font-medium rounded-lg transition-colors ${activeTab === tab.id ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'}`}
           >
-            {tab.replace('_', ' ')}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -128,12 +137,12 @@ const UserDashboard = () => {
         {activeTab === 'CATALOG' && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-white">Available Games</h3>
+              <h3 className="text-2xl font-bold text-white">{t.userDashboard.availableGames}</h3>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
-                  type="text"
-                  placeholder="Filter by City..."
+                  type="text" 
+                  placeholder={t.userDashboard.filterByCity}
                   value={cityFilter}
                   onChange={(e) => setCityFilter(e.target.value)}
                   className="glass-input pl-10 pr-4 py-2 rounded-lg text-sm"
@@ -159,7 +168,7 @@ const UserDashboard = () => {
                         <MapPin className="w-4 h-4 text-emerald-400" /> {item.cafe.name}, {item.cafe.city}
                       </div>
                       <div className="flex justify-between text-sm text-slate-300 mb-4 bg-slate-800/50 p-3 rounded-lg">
-                        <span>Deposit Required:</span>
+                        <span>{t.userDashboard.depositRequired}</span>
                         <span className="font-semibold text-emerald-400">${depositRequired.toFixed(2)}</span>
                       </div>
                     </div>
@@ -167,14 +176,14 @@ const UserDashboard = () => {
                       onClick={() => handleBook(item.id)}
                       className="glass-button w-full py-2.5 rounded-lg mt-auto"
                     >
-                      Book Rental
+                      {t.userDashboard.bookRental}
                     </button>
                   </div>
                 );
               })}
               {filteredInventory.length === 0 && (
                 <div className="col-span-3 text-center py-12 text-slate-400">
-                  No games found in this area.
+                  {t.userDashboard.noGamesInArea}
                 </div>
               )}
             </div>
@@ -184,7 +193,7 @@ const UserDashboard = () => {
         {/* Active Rentals */}
         {activeTab === 'ACTIVE_RENTALS' && (
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white mb-6">Active Bookings</h3>
+            <h3 className="text-2xl font-bold text-white mb-6">{t.userDashboard.activeBookings}</h3>
             {activeRentals.map(rental => (
               <div key={rental.id} className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6 border-l-4 border-l-emerald-500">
                 <div className="flex items-center gap-4">
@@ -194,14 +203,14 @@ const UserDashboard = () => {
                   <div>
                     <h4 className="text-lg font-bold text-white">{rental.inventory_item.board_game.title}</h4>
                     <p className="text-sm text-slate-400 flex items-center gap-2">
-                      <MapPin className="w-3 h-3" /> Pickup at {rental.pickup_cafe.name}
+                      <MapPin className="w-3 h-3" /> {t.userDashboard.pickupAt} {rental.pickup_cafe.name}
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex flex-col md:flex-row items-center gap-8">
                   <div className="text-center">
-                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Status</div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">{t.userDashboard.status}</div>
                     <div className="font-semibold text-white bg-slate-800 px-3 py-1 rounded-full text-sm">
                       {rental.status}
                     </div>
@@ -210,7 +219,7 @@ const UserDashboard = () => {
                   {rental.due_date && (
                     <div className="text-center">
                       <div className="text-xs text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
-                        <Clock className="w-3 h-3" /> Due Date
+                        <Clock className="w-3 h-3" /> {t.userDashboard.dueDate}
                       </div>
                       <div className="font-semibold text-rose-300">
                         {new Date(rental.due_date).toLocaleDateString()}
@@ -219,7 +228,7 @@ const UserDashboard = () => {
                   )}
 
                   <div className="text-center">
-                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">Pickup Code</div>
+                    <div className="text-xs text-slate-400 uppercase tracking-wider mb-1">{t.userDashboard.pickupCode}</div>
                     <div className="font-mono text-xl font-bold text-indigo-400 bg-indigo-500/10 px-4 py-1 rounded-lg border border-indigo-500/20">
                       #{rental.id.toString().padStart(4, '0')}
                     </div>
@@ -229,7 +238,7 @@ const UserDashboard = () => {
             ))}
             {activeRentals.length === 0 && (
               <div className="text-center py-12 text-slate-400 glass-panel rounded-2xl border-dashed">
-                You have no active rentals. Head to the catalog to book a game!
+                {t.userDashboard.noActiveRentals}
               </div>
             )}
           </div>
@@ -238,32 +247,34 @@ const UserDashboard = () => {
         {/* History */}
         {activeTab === 'HISTORY' && (
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold text-white mb-6">Rental History</h3>
+            <h3 className="text-2xl font-bold text-white mb-6">{t.userDashboard.rentalHistory}</h3>
             {historyRentals.map(rental => (
               <div key={rental.id} className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6 opacity-80 hover:opacity-100 transition-opacity">
                 <div>
                   <h4 className="text-lg font-bold text-white mb-1">{rental.inventory_item.board_game.title}</h4>
-                  <p className="text-sm text-slate-400">Returned on {new Date(rental.return_date).toLocaleDateString()}</p>
+                  <p className="text-sm text-slate-400">
+                    {t.userDashboard.returnedOn} {new Date(rental.return_date).toLocaleDateString()}
+                  </p>
                 </div>
                 
                 <div className="flex items-center gap-6">
                   <div className="text-right">
-                    <div className="text-sm text-slate-300">Base Fee: ${rental.rent_fee_charged}</div>
+                    <div className="text-sm text-slate-300">{t.userDashboard.baseFee} ${rental.rent_fee_charged}</div>
                     {parseFloat(rental.late_fee_charged) > 0 && (
-                      <div className="text-sm text-rose-400">Late Fee: ${rental.late_fee_charged}</div>
+                      <div className="text-sm text-rose-400">{t.userDashboard.lateFee} ${rental.late_fee_charged}</div>
                     )}
                   </div>
                   
                   <div className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${rental.status === 'RETURNED_SAFE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
                     {rental.status === 'RETURNED_SAFE' ? <CheckCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-                    {rental.status.split('_')[1]}
+                    <span>{rental.status === 'RETURNED_SAFE' ? t.userDashboard.returnedSafe : t.userDashboard.returnedDamaged}</span>
                   </div>
                 </div>
               </div>
             ))}
             {historyRentals.length === 0 && (
               <div className="text-center py-12 text-slate-400 glass-panel rounded-2xl border-dashed">
-                Your past rentals will appear here.
+                {t.userDashboard.noHistory}
               </div>
             )}
           </div>
@@ -281,15 +292,15 @@ const UserDashboard = () => {
             >
               ✕
             </button>
-            <h3 className="text-2xl font-bold text-white mb-2">Add Funds</h3>
-            <p className="text-slate-400 text-sm mb-6">Enter amount to top up your wallet.</p>
+            <h3 className="text-2xl font-bold text-white mb-2">{t.userDashboard.topupModalTitle}</h3>
+            <p className="text-slate-400 text-sm mb-6">{t.userDashboard.topupModalDesc}</p>
             
             <form onSubmit={handleTopup}>
               <div className="relative mb-6">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
                 <input 
-                  type="number"
-                  min="1"
+                  type="number" 
+                  min="1" 
                   step="0.01"
                   value={topupAmount}
                   onChange={(e) => setTopupAmount(e.target.value)}
@@ -299,7 +310,7 @@ const UserDashboard = () => {
                 />
               </div>
               <button type="submit" className="glass-button w-full py-3 rounded-xl">
-                Confirm Top Up
+                {t.userDashboard.confirmTopup}
               </button>
             </form>
           </div>
