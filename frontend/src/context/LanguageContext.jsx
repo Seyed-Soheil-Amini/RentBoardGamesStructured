@@ -1,0 +1,425 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+const translations = {
+  fa: {
+    // Navbar
+    nav: {
+      brand: 'بردگیم ایکس',
+      browseGames: 'مشاهده بازی‌ها',
+      pricingTiers: 'پلن‌های اشتراک',
+      howItWorks: 'نحوه کارکرد',
+      signIn: 'ورود',
+      getStarted: 'شروع کنید',
+      dashboard: 'داشبورد من',
+      signOut: 'خروج',
+      wallet: 'موجودی',
+    },
+    // Banner for logged-in users
+    welcomeBanner: {
+      welcome: 'خوش آمدید،',
+      walletBalance: 'موجودی کیف پول شما:',
+      goToDashboard: 'ورود به پنل کاربری',
+    },
+    // Hero
+    hero: {
+      badge: 'شبکه غیرمتمرکز تبادل و کرایه بازی‌های رومیزی',
+      titleStart: 'بهترین بردگیم‌های دنیا را',
+      titleHighlight: 'بدون خرید گران‌قیمت بازی کنید.',
+      subtitle:
+        'کرایه و تحویل بازی‌های اورجینال از کافه بازی‌های معتبر شهر. بهره‌مندی از ۵۰٪ تخفیف ودیعه، روزهای کرایه رایگان و تسویه خودکار کیف پول.',
+      browseBtn: 'مشاهده بازی‌های موجود',
+      calcBtn: 'محاسبه تخفیف ودیعه',
+      stats: {
+        depositReduction: 'کاهش ودیعه',
+        depositReductionValue: 'تا ۵۰٪ تخفیف',
+        depositReductionDesc: 'با اشتراک پلاتینیوم',
+        freeDays: 'روزهای بازی رایگان',
+        freeDaysValue: '۳ تا ۱۰ روز',
+        freeDaysDesc: 'بدون هزینه روزانه کرایه',
+        partnerCafes: 'کافه بازی‌های همکار',
+        partnerCafesValue: '۲۰٪ سهم درآمد',
+        partnerCafesDesc: 'واریز خودکار به حساب کافه',
+        safeEscrow: 'امنیت و بیعانه امن',
+        safeEscrowValue: '۱۰۰٪ تضمین شده',
+        safeEscrowDesc: 'آزادسازی خودکار در کیف پول',
+      },
+    },
+    // How It Works
+    howItWorks: {
+      badge: 'ساده و شفاف',
+      title: 'سامانه چگونه کار می‌کند؟',
+      subtitle: 'ارتباط مستقیم بازیکنان و کافه‌ها از طریق کیف پول دیجیتال در چهار مرحله آسان.',
+      step1Title: '۱. انتخاب و رزرو آنلاین',
+      step1Desc: 'بازی مورد علاقه‌تان را از نزدیک‌ترین کافه همکار انتخاب و با ودیعه کیف پول رزرو کنید.',
+      step1Badge: 'نگهداری امن ودیعه در امانت',
+      step2Title: '۲. تحویل در کافه',
+      step2Desc: 'به کافه همکار مراجعه کرده، کد رهگیری را نشان دهید و جعبه بررسی‌شده را تحویل بگیرید.',
+      step2Badge: 'بررسی سریع قطعات توسط کافه',
+      step3Title: '۳. لذت در دورهمی',
+      step3Desc: 'بازی را به خانه ببرید یا با دوستان بازی کنید. پلن شما شامل ۳ تا ۱۰ روز مهلت رایگان است.',
+      step3Badge: 'مهلت بازی بدون استرس',
+      step4Title: '۴. بازگشت و آزادسازی وجه',
+      step4Desc: 'بازی را به همان کافه تحویل دهید. پس از تایید سلامت، باقیمانده ودیعه فورا آزاد می‌شود.',
+      step4Badge: 'بازگشت آنی موجودی به کیف پول',
+    },
+    // Calculator
+    calculator: {
+      badge: 'محاسبه‌گر زنده هزینه و ودیعه',
+      title: 'مزایای اشتراک‌ها را زنده بسنجید',
+      subtitle:
+        'پلن‌های بالاتر به شکل چشمگیری میزان بیعانه مسدود شده در کیف پول را کاهش داده و روزهای بازی رایگان را افزایش می‌دهند.',
+      retailPriceLabel: 'قیمت فروشگاه بازی:',
+      selectTierLabel: 'سطح اشتراک را انتخاب کنید:',
+      depositRequirement: 'میزان بیعانه مورد نیاز',
+      msrpOf: 'از ارزش کل بازی',
+      escrowHold: 'مبلغ ودیعه مسدود شده',
+      saveInWallet: 'صرفه‌جویی نقدی در کیف پول',
+      fullHold: '۱۰۰٪ کل ارزش بازی',
+      freeDaysIncluded: 'روزهای کرایه رایگان',
+      noDailyFee: 'بدون هزینه اضافه در این دوره',
+      baseRentalFee: 'کارمزد پایه کرایه',
+      feeMultiplier: 'ضریب کرایه پلن',
+      safeNote: 'مبلغ ودیعه پس از تحویل سالم بازی به کافه، بلافاصله به کیف پول شما بازگردانده می‌شود.',
+      joinWith: 'عضویت در پلن',
+    },
+    // Catalog Preview
+    catalog: {
+      badge: 'پیش‌نمایش موجودی زنده',
+      title: 'بازی‌های محبوب و آماده کرایه',
+      subtitle: 'هم‌اکنون در کافه بازی‌های معتبر شهر آماده رزرو و تحویل هستند.',
+      searchPlaceholder: 'جستجوی نام بازی یا کافه...',
+      categories: {
+        ALL: 'همه بازی‌ها',
+        Strategy: 'استراتژیک',
+        Family: 'خانوادگی',
+        'Sci-Fi': 'علمی-تخیلی',
+      },
+      depositFrom: 'ودیعه از (پلن طلایی)',
+      rentNow: 'کرایه فوری',
+      signUpToRent: 'ثبت‌نام و کرایه',
+      noResults: 'هیچ بازی با این مشخصات یافت نشد. فیلترها را تغییر دهید.',
+      players: 'نفر',
+      minutes: 'دقیقه',
+    },
+    // Pillars
+    pillars: {
+      badge: 'اکوسیستم پویا',
+      title: 'طراحی شده برای تمامی دوستداران بازی رومیزی',
+      playerTitle: 'برای بازیکنان و جمع‌های دوستانه',
+      playerDesc: 'دسترسی نامحدود به عناوین مطرح و گران‌قیمت جهانی بدون نیاز به پرداخت هزینه‌های سنگین خرید.',
+      playerB1: '۳ تا ۱۰ روز مهلت رایگان بازی در هر سفارش',
+      playerB2: 'آزادسازی لحظه‌ای ودیعه پس از تحویل',
+      playerB3: 'تضمین اصالت و سلامت کامل قطعات',
+      cafeTitle: 'برای کافه بازی‌های همکار',
+      cafeDesc: 'کافه خود را به مرکز تبادل بازی شهر تبدیل کنید و با جذب مداوم مشتری، درآمد ثابت کسب نمایید.',
+      cafeB1: '۲۰٪ سهم درآمد مستقیم و خودکار از هر کرایه',
+      cafeB2: 'پنل اختصاصی و ساده تحویل و بازگشت',
+      cafeB3: 'بدون نیاز به تجهیزات سخت‌افزاری خاص',
+      collectorTitle: 'برای کلکسیونرها و مالکان بازی',
+      collectorDesc: 'اجازه ندهید بازی‌های باارزش در قفسه خاک بخورند. بازی‌هایتان را در شبکه به اشتراک بگذارید.',
+      collectorB1: 'تضمین ۱۰۰٪ جبران خسارت در صورت آسیب',
+      collectorB2: 'نگهداری حرفه‌ای در معتبرترین کافه‌ها',
+      collectorB3: 'درآمد غیرفعال از مجموعه بازی‌ها',
+    },
+    // Tiers Matrix
+    tiers: {
+      badge: 'پلن‌های عضویت',
+      title: 'کارت اشتراک خود را انتخاب کنید',
+      subtitle: 'با ارتقای سطح، ودیعه کمتری بپردازید و روزهای کرایه رایگان بیشتری هدیه بگیرید.',
+      basicName: 'پایه (Basic)',
+      basicBadge: 'طرح عادی',
+      basicPrice: 'رایگان',
+      basicPeriod: ' / حساب شروع',
+      basicDesc: 'مناسب برای علاقه‌مندانی که گهگاه در روزهای تعطیل قصد تجربه یک بازی دارند.',
+      basicB1: '۱۰۰٪ بیعانه امانی ارزش بازی',
+      basicB2: '۳ روز کرایه رایگان در هر بار',
+      basicB3: 'ضریب هزینه کرایه ۱.۰x',
+      basicB4: 'دسترسی به تمامی کافه‌های شبکه',
+      basicBtn: 'شروع رایگان',
+
+      goldName: 'طلایی (Gold)',
+      goldBadge: 'پیشنهاد ویژه و محبوب',
+      goldPrice: '۱۴.۹۹$',
+      goldPeriod: ' / ماهیانه',
+      goldDesc: 'بهترین انتخاب برای جمع‌هایی که به صورت هفتگی دورهمی بازی دارند.',
+      goldB1: '۷۰٪ بیعانه امانی (۳۰٪ تخفیف ودیعه)',
+      goldB2: '۷ روز کرایه رایگان در هر بار',
+      goldB3: 'ضریب هزینه کرایه ۰.۸x (۲۰٪ تخفیف)',
+      goldB4: 'اولویت در رزرو عناوین پرطرفدار',
+      goldBtn: 'انتخاب پلن طلایی',
+
+      platinumName: 'پلاتینیوم (Platinum)',
+      platinumBadge: 'ویژه حرفه‌ای‌ها',
+      platinumPrice: '۲۹.۹۹$',
+      platinumPeriod: ' / ماهیانه',
+      platinumDesc: 'بیشترین آزادی عمل: نصف شدن ودیعه، ۱۰ روز مهلت رایگان و کرایه با نصف قیمت.',
+      platinumB1: '۵۰٪ بیعانه امانی (۵۰٪ تخفیف ودیعه)',
+      platinumB2: '۱۰ روز کرایه رایگان در هر بار',
+      platinumB3: 'ضریب هزینه کرایه ۰.۵x (۵۰٪ تخفیف)',
+      platinumB4: 'پاداش اشتراک‌گذاری بازی در شبکه',
+      platinumBtn: 'انتخاب پلن پلاتینیوم',
+    },
+    // FAQ
+    faq: {
+      badge: 'پاسخ به سوالات متداول',
+      title: 'پرسش‌های متداول',
+      subtitle: 'هر آنچه باید درباره سیستم ودیعه، تحویل در کافه‌ها و جبران خسارت بدانید.',
+      q1: 'ودیعه امن (Escrow) چگونه کار می‌کند؟',
+      a1: 'هنگام رزرو بازی، مبلغ ودیعه در حساب کاربری شما موقتا به حالت امانت درمی‌آید. با توجه به پلن اشتراک (پایه ۱۰۰٪، طلایی ۷۰٪، پلاتینیوم ۵۰٪)، تنها بخشی از ارزش بازی مسدود می‌شود. پس از بازگرداندن بازی به کافه و تایید سلامت آن، باقیمانده ودیعه سریعاً به موجودی قابل استفاده شما بازمی‌گردد.',
+      q2: 'بازی‌ها را در کجا تحویل گرفته و بازمی‌گردانیم؟',
+      a2: 'تمامی بازی‌ها در کافه بازی‌های همکار نگهداری می‌شوند. طبق قانون ثابت پلتفرم، بازی باید دقیقا به همان کافه‌ای که از آن تحویل گرفته شده بازگردانده شود. این موضوع امنیت قطعات و سرعت در بازبینی را تضمین می‌کند.',
+      q3: 'اگر بازی دچار آسیب یا کسری قطعات شود چه اتفاقی می‌افتد؟',
+      a3: 'کافه همکار قطعات بازی را در حضور مشتری بازبینی می‌کند. در صورت آسیب جدی به بازی طبق قانون ۱۰۰٪ جبران خسارت، معادل قیمت روز بازی کسر شده تا یک نسخه نو برای شبکه تهیه گردد.',
+      q4: 'کافه‌ها و مالکان بازی چگونه درآمد کسب می‌کنند؟',
+      a4: 'کافه بازی‌ها به ازای هر بار کرایه بازی‌های مستقر در کافه، ۲۰٪ سهم درآمد مستقیم دریافت می‌کنند. همچنین کلکسیونرها می‌توانند بازی‌های شخصی خود را در کافه‌ها به امانت بگذارند و از هر بار کرایه کسب سود نمایند.',
+      q5: 'روزهای رایگان و جریمه دیرکرد چگونه محاسبه می‌شود؟',
+      a5: 'در هر بار کرایه بر اساس نوع اشتراک شما، ۳ تا ۱۰ روز اول رایگان بوده و فقط هزینه پایه کرایه کسر می‌شود. در صورت تاخیر بیش از موعد، به ازای هر روز دیرکرد ۲۵٪ ارزش ریالی بازی به عنوان جریمه محاسبه خواهد شد.',
+    },
+    // CTA & Footer
+    cta: {
+      title: 'برای یک شب بازی فراموش‌نشدنی آماده‌اید؟',
+      subtitle: 'به جمع صدها علاقه‌مند به بازی‌های رومیزی و کافه‌های منتخب بپیوندید. ثبت‌نام کمتر از ۱ دقیقه زمان می‌برد.',
+      createAccount: 'ایجاد حساب کاربری رایگان',
+      cafeLogin: 'ورود ویژه کافه‌های همکار',
+    },
+    footer: {
+      rights: '© ۲۰۲۶ شبکه غیرمتمرکز تبادل و کرایه بازی‌های رومیزی',
+      howItWorks: 'نحوه کارکرد',
+      tiers: 'پلن‌های اشتراک',
+      catalog: 'فهرست بازی‌ها',
+      signIn: 'ورود به حساب',
+    },
+  },
+
+  en: {
+    // Navbar
+    nav: {
+      brand: 'BoardGameX',
+      browseGames: 'Browse Games',
+      pricingTiers: 'Pricing & Tiers',
+      howItWorks: 'How It Works',
+      signIn: 'Sign In',
+      getStarted: 'Get Started',
+      dashboard: 'Dashboard',
+      signOut: 'Sign Out',
+      wallet: 'Wallet',
+    },
+    // Banner for logged-in users
+    welcomeBanner: {
+      welcome: 'Welcome back,',
+      walletBalance: 'Your wallet balance is:',
+      goToDashboard: 'Go to My Dashboard',
+    },
+    // Hero
+    hero: {
+      badge: 'Decentralized Physical Board Game Exchange',
+      titleStart: 'Play Top-Tier Board Games',
+      titleHighlight: 'Without The Top-Tier Cost.',
+      subtitle:
+        'Borrow verified designer board games from local partner cafes. Unlock up to 50% lower deposit holds, included free rental days, and seamless wallet escrow settlements.',
+      browseBtn: 'Browse Available Games',
+      calcBtn: 'Calculate Deposit Savings',
+      stats: {
+        depositReduction: 'Deposit Reduction',
+        depositReductionValue: 'Up to 50% Off',
+        depositReductionDesc: 'With Platinum membership',
+        freeDays: 'Free Rental Window',
+        freeDaysValue: '3 to 10 Days',
+        freeDaysDesc: 'Zero daily fee during free days',
+        partnerCafes: 'Partner Cafes',
+        partnerCafesValue: '20% Rev Share',
+        partnerCafesDesc: 'Credited directly to cafes',
+        safeEscrow: 'Safety & Escrow',
+        safeEscrowValue: '100% Guaranteed',
+        safeEscrowDesc: 'Automated wallet release',
+      },
+    },
+    // How It Works
+    howItWorks: {
+      badge: 'Simple & Frictionless',
+      title: 'How The Network Works',
+      subtitle: 'Everything connects through your digital wallet and trusted partner cafes in four simple steps.',
+      step1Title: '1. Reserve Online',
+      step1Desc: 'Browse available copies across local cafes. Reserve in one click with your pre-funded wallet.',
+      step1Badge: 'Escrow held safely in wallet',
+      step2Title: '2. Pickup at Cafe',
+      step2Desc: 'Head to the partner cafe, show your instant pickup code, and receive your checked, complete game box.',
+      step2Badge: 'Friendly cafe staff check',
+      step3Title: '3. Enjoy Game Night',
+      step3Desc: 'Take it home or play with friends. Your tier gives you 3 to 10 free rental days with zero daily fees.',
+      step3Badge: 'Stress-free playing window',
+      step4Title: '4. Return & Refund',
+      step4Desc: 'Return to the same cafe. After a quick component check, remaining deposit returns instantly to your wallet.',
+      step4Badge: 'Instant wallet unlock',
+    },
+    // Calculator
+    calculator: {
+      badge: 'Live Cost & Deposit Calculator',
+      title: 'See Your Subscription Perks in Action',
+      subtitle:
+        'Higher tiers significantly reduce the escrow security deposit held in your wallet and grant you extra free days.',
+      retailPriceLabel: 'Retail Game Value:',
+      selectTierLabel: 'Select Tier Level:',
+      depositRequirement: 'Deposit Requirement',
+      msrpOf: 'of retail price',
+      escrowHold: 'Escrow Deposit Hold',
+      saveInWallet: 'Savings kept in wallet',
+      fullHold: '100% full hold',
+      freeDaysIncluded: 'Free Days Included',
+      noDailyFee: 'No daily rental charges',
+      baseRentalFee: 'Base Rental Fee',
+      feeMultiplier: 'tier fee multiplier',
+      safeNote: 'Deposit returns automatically to your wallet upon safe cafe drop-off.',
+      joinWith: 'Join with',
+    },
+    // Catalog Preview
+    catalog: {
+      badge: 'Live Inventory Preview',
+      title: 'Popular Games in the Network',
+      subtitle: 'Ready for immediate pickup at verified partner cafes.',
+      searchPlaceholder: 'Search games, cafes...',
+      categories: {
+        ALL: 'All Games',
+        Strategy: 'Strategy',
+        Family: 'Family',
+        'Sci-Fi': 'Sci-Fi',
+      },
+      depositFrom: 'Deposit from (Gold)',
+      rentNow: 'Rent Now',
+      signUpToRent: 'Sign Up to Rent',
+      noResults: 'No games match your search criteria. Try a different query or filter!',
+      players: 'Players',
+      minutes: 'min',
+    },
+    // Pillars
+    pillars: {
+      badge: 'A Thriving Ecosystem',
+      title: 'Built for Every Tabletop Lover',
+      playerTitle: 'For Players & Groups',
+      playerDesc: 'Explore expensive new releases and legendary classics for weekend game nights without committing $100+ to purchase.',
+      playerB1: 'Free 3-10 day rental window on every game',
+      playerB2: 'Instant wallet deposit release on safe drop-off',
+      playerB3: 'Verified complete and pristine components',
+      cafeTitle: 'For Partner Cafes',
+      cafeDesc: 'Turn your venue into a physical exchange hub. Gain massive foot traffic from board game enthusiasts.',
+      cafeB1: 'Automated 20% revenue share payout on every rental',
+      cafeB2: 'Simple cafe handover & return terminal',
+      cafeB3: 'Zero hardware or upfront expense',
+      collectorTitle: 'For Game Collectors',
+      collectorDesc: "Don't let your rare collection sit idle collecting dust. Deposit copies at partner cafes for passive returns.",
+      collectorB1: '100% full replacement damage guarantee',
+      collectorB2: 'Professional cafe custody & inspection',
+      collectorB3: 'Passive revenue from your shelf collection',
+    },
+    // Tiers Matrix
+    tiers: {
+      badge: 'Membership Plans',
+      title: 'Pick Your Tabletop Pass',
+      subtitle: 'Upgrade anytime to slash your deposit holds and extend free playing windows.',
+      basicName: 'Basic',
+      basicBadge: 'Casual Plan',
+      basicPrice: 'Free',
+      basicPeriod: ' / starter account',
+      basicDesc: 'Ideal for occasional gamers testing out games for the weekend.',
+      basicB1: '100% Deposit Hold',
+      basicB2: '3 Free Days included',
+      basicB3: '1.0x Base Rental Rate',
+      basicB4: 'Access to all partner cafe hubs',
+      basicBtn: 'Get Started Free',
+
+      goldName: 'Gold',
+      goldBadge: 'Most Popular',
+      goldPrice: '$14.99',
+      goldPeriod: ' / month',
+      goldDesc: 'Our recommended plan for regular game nights with substantial deposit discounts.',
+      goldB1: '70% Deposit Hold (30% discount)',
+      goldB2: '7 Free Days included',
+      goldB3: '0.8x Rental Fee (20% off)',
+      goldB4: 'Priority booking on hot releases',
+      goldBtn: 'Choose Gold',
+
+      platinumName: 'Platinum',
+      platinumBadge: 'Master Collector',
+      platinumPrice: '$29.99',
+      platinumPeriod: ' / month',
+      platinumDesc: 'Maximum freedom: 50% deposit cuts, 10 free days, and half-price rental rates.',
+      platinumB1: '50% Deposit Hold (50% discount)',
+      platinumB2: '10 Free Days included',
+      platinumB3: '0.5x Rental Fee (50% off)',
+      platinumB4: 'Crowdsourcing payout bonus',
+      platinumBtn: 'Choose Platinum',
+    },
+    // FAQ
+    faq: {
+      badge: 'Have Questions?',
+      title: 'Frequently Asked Questions',
+      subtitle: 'Everything you need to know about deposits, cafe pickups, and damage settlements.',
+      q1: 'How does the escrow security deposit work?',
+      a1: 'When you reserve a game, the deposit hold is temporarily locked in your wallet escrow. Depending on your subscription tier (Basic: 100%, Gold: 70%, Platinum: 50%), you only tie up a fraction of the retail value. Once you safely return the game to the partner cafe, the remaining deposit is immediately returned to your spendable wallet.',
+      q2: 'Where do I pick up and return the board games?',
+      a2: 'All games are hosted and verified at partner board game cafes. Under our strict logistics constraint, physical board games must always be returned to the exact same partner cafe location where they were picked up. This guarantees inventory safety and fast component inspection.',
+      q3: 'What happens if a game is returned damaged or missing pieces?',
+      a3: 'Partner cafes inspect every returned game box at the counter. If a game is deemed damaged or unplayable by the partner cafe, our 100% damage settlement rule applies: the full retail price of the game is deducted to replace the copy for the community or owner.',
+      q4: 'Can board game cafes or collectors earn money?',
+      a4: 'Yes! Board game cafes earn a 20% automated revenue share on every rental hosted at their venue. Individual collectors can also crowdsource their idle game shelves into our network hubs to earn passive rental income with full escrow protection.',
+      q5: 'What are Free Days and how are late fees calculated?',
+      a5: 'Every rental includes free rental days based on your tier (Basic: 3 days, Gold: 7 days, Platinum: 10 days). If you return within your free window, you only pay the base rental fee. If overdue, a late fee of 25% of the retail price is charged per overdue day.',
+    },
+    // CTA & Footer
+    cta: {
+      title: 'Ready to Elevate Your Next Game Night?',
+      subtitle: 'Join hundreds of board game enthusiasts and local cafes. Create your account in less than a minute.',
+      createAccount: 'Create Free Account',
+      cafeLogin: 'Partner Cafe Login',
+    },
+    footer: {
+      rights: '© 2026 Decentralized Board Game Exchange Network',
+      howItWorks: 'How It Works',
+      tiers: 'Subscription Tiers',
+      catalog: 'Game Catalog',
+      signIn: 'Sign In',
+    },
+  },
+};
+
+const LanguageContext = createContext();
+
+export const LanguageProvider = ({ children }) => {
+  // Default is Persian ('fa'), English ('en') is secondary
+  const [language, setLanguageState] = useState(() => {
+    return localStorage.getItem('app_language') || 'fa';
+  });
+
+  const setLanguage = (lang) => {
+    setLanguageState(lang);
+    localStorage.setItem('app_language', lang);
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'fa' ? 'en' : 'fa');
+  };
+
+  useEffect(() => {
+    // Synchronize HTML attributes: dir and lang
+    const dir = language === 'fa' ? 'rtl' : 'ltr';
+    document.documentElement.dir = dir;
+    document.documentElement.lang = language;
+  }, [language]);
+
+  const t = translations[language] || translations.fa;
+  const isRTL = language === 'fa';
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t, isRTL }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+};

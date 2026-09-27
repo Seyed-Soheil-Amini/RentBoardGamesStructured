@@ -27,7 +27,7 @@ const Register = () => {
     setError('');
     const success = await register(formData);
     if (success) {
-      navigate('/');
+      navigate('/dashboard');
     } else {
       setError('Registration failed. Username might be taken.');
     }
