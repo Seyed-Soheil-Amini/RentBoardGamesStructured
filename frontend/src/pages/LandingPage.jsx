@@ -28,7 +28,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Dune: Imperium',
       publisher: 'Dire Wolf',
-      retail_price: '55.00',
+      retail_price: '2800000',
       category: 'Strategy',
       players: '1-4 Players',
       playtime: '60-120 min',
@@ -45,7 +45,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Wingspan',
       publisher: 'Stonemaier Games',
-      retail_price: '65.00',
+      retail_price: '2200000',
       category: 'Family',
       players: '1-5 Players',
       playtime: '40-70 min',
@@ -62,7 +62,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Terraforming Mars',
       publisher: 'FryxGames',
-      retail_price: '70.00',
+      retail_price: '2500000',
       category: 'Sci-Fi',
       players: '1-5 Players',
       playtime: '120 min',
@@ -79,7 +79,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Brass: Birmingham',
       publisher: 'Roxley Games',
-      retail_price: '85.00',
+      retail_price: '3500000',
       category: 'Strategy',
       players: '2-4 Players',
       playtime: '90-120 min',
@@ -96,7 +96,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Azul',
       publisher: 'Next Move Games',
-      retail_price: '40.00',
+      retail_price: '1400000',
       category: 'Family',
       players: '2-4 Players',
       playtime: '30-45 min',
@@ -113,7 +113,7 @@ const FALLBACK_GAMES = [
     board_game: {
       title: 'Root: A Game of Woodland Might',
       publisher: 'Leder Games',
-      retail_price: '60.00',
+      retail_price: '2600000',
       category: 'Strategy',
       players: '2-4 Players',
       playtime: '60-90 min',
@@ -129,7 +129,7 @@ const FALLBACK_GAMES = [
 
 const LandingPage = () => {
   const { user } = useAuth();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, formatCurrency, formatPrice } = useLanguage();
   const navigate = useNavigate();
 
   // Catalog state
@@ -138,7 +138,7 @@ const LandingPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('ALL');
 
   // Interactive Tier Simulator
-  const [simGamePrice, setSimGamePrice] = useState(60);
+  const [simGamePrice, setSimGamePrice] = useState(1500000);
   const [simSelectedTier, setSimSelectedTier] = useState('GOLD');
 
   // FAQ open toggles
@@ -198,9 +198,9 @@ const LandingPage = () => {
   };
 
   const currentTier = tierConfig[simSelectedTier];
-  const requiredDeposit = (simGamePrice * currentTier.depositRate).toFixed(2);
-  const baseRentalFee = (simGamePrice * 0.10 * currentTier.feeMultiplier).toFixed(2);
-  const savingsAmount = (simGamePrice * (1.0 - currentTier.depositRate)).toFixed(2);
+  const requiredDeposit = Math.round(simGamePrice * currentTier.depositRate);
+  const baseRentalFee = Math.round(simGamePrice * 0.10 * currentTier.feeMultiplier);
+  const savingsAmount = Math.round(simGamePrice * (1.0 - currentTier.depositRate));
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -229,7 +229,7 @@ const LandingPage = () => {
               <p className="text-sm text-slate-300">
                 {t.welcomeBanner.welcome} <span className="font-semibold text-white">{user.username}</span>!{' '}
                 {t.welcomeBanner.walletBalance}{' '}
-                <span className="text-emerald-400 font-bold">${user.profile?.wallet_balance || '0.00'}</span>.
+                <span className="text-emerald-400 font-bold">{formatCurrency(user.profile?.wallet_balance || 0)}</span>.
               </p>
             </div>
           </div>
@@ -418,21 +418,21 @@ const LandingPage = () => {
             <div className="space-y-3 bg-slate-900/60 p-5 rounded-2xl border border-slate-800">
               <div className="flex justify-between items-center text-sm">
                 <label className="text-slate-300 font-medium">{t.calculator.retailPriceLabel}</label>
-                <span className="text-lg font-bold text-indigo-400">${simGamePrice}.00</span>
+                <span className="text-lg font-bold text-indigo-400">{formatCurrency(simGamePrice)}</span>
               </div>
               <input
                 type="range"
-                min="30"
-                max="160"
-                step="5"
+                min="500000"
+                max="4000000"
+                step="50000"
                 value={simGamePrice}
                 onChange={(e) => setSimGamePrice(Number(e.target.value))}
                 className="w-full accent-indigo-500 cursor-pointer h-2 bg-slate-700 rounded-lg"
               />
               <div className="flex justify-between text-xs text-slate-500 font-mono">
-                <span>$30</span>
-                <span>$85</span>
-                <span>$160</span>
+                <span>{formatPrice(500000)}</span>
+                <span>{formatPrice(2000000)}</span>
+                <span>{formatCurrency(4000000)}</span>
               </div>
             </div>
 
@@ -477,9 +477,9 @@ const LandingPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                 <span className="text-xs text-slate-400 block mb-1">{t.calculator.escrowHold}</span>
-                <span className="text-2xl font-extrabold text-white">${requiredDeposit}</span>
+                <span className="text-2xl font-extrabold text-white">{formatCurrency(requiredDeposit)}</span>
                 <span className="text-xs text-emerald-400 block mt-1">
-                  {simSelectedTier !== 'BASIC' ? `${t.calculator.saveInWallet}: $${savingsAmount}` : t.calculator.fullHold}
+                  {simSelectedTier !== 'BASIC' ? `${t.calculator.saveInWallet}: ${formatCurrency(savingsAmount)}` : t.calculator.fullHold}
                 </span>
               </div>
 
@@ -491,7 +491,7 @@ const LandingPage = () => {
 
               <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
                 <span className="text-xs text-slate-400 block mb-1">{t.calculator.baseRentalFee}</span>
-                <span className="text-2xl font-extrabold text-fuchsia-400">${baseRentalFee}</span>
+                <span className="text-2xl font-extrabold text-fuchsia-400">{formatCurrency(baseRentalFee)}</span>
                 <span className="text-xs text-slate-400 block mt-1">{currentTier.feeMultiplier}x {t.calculator.feeMultiplier}</span>
               </div>
             </div>
@@ -557,8 +557,8 @@ const LandingPage = () => {
         {/* Game Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredGames.map((item) => {
-            const retail = parseFloat(item.board_game.retail_price) || 50;
-            const goldDeposit = (retail * 0.7).toFixed(2);
+            const retail = parseFloat(item.board_game.retail_price) || 1500000;
+            const goldDeposit = Math.round(retail * 0.7);
 
             return (
               <div
@@ -602,7 +602,7 @@ const LandingPage = () => {
                 <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
                   <div>
                     <div className="text-[11px] text-slate-400">{t.catalog.depositFrom}</div>
-                    <div className="text-base font-bold text-emerald-400">${goldDeposit}</div>
+                    <div className="text-base font-bold text-emerald-400">{formatCurrency(goldDeposit)}</div>
                   </div>
                   <button
                     onClick={() => {

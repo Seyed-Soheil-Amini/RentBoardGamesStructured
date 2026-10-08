@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { formatPrice, formatCurrency } from '../utils/currency';
 
 const translations = {
   fa: {
+    currency: 'تومان',
     // Navbar
     nav: {
       brand: 'بردگیم ایکس',
@@ -163,7 +165,7 @@ const translations = {
 
       goldName: 'طلایی (Gold)',
       goldBadge: 'پیشنهاد ویژه و محبوب',
-      goldPrice: '۱۴.۹۹$',
+      goldPrice: '۱۴۹,۰۰۰ تومان',
       goldPeriod: ' / ماهیانه',
       goldDesc: 'بهترین انتخاب برای جمع‌هایی که به صورت هفتگی دورهمی بازی دارند.',
       goldB1: '۷۰٪ بیعانه امانی (۳۰٪ تخفیف ودیعه)',
@@ -174,7 +176,7 @@ const translations = {
 
       platinumName: 'پلاتینیوم (Platinum)',
       platinumBadge: 'ویژه حرفه‌ای‌ها',
-      platinumPrice: '۲۹.۹۹$',
+      platinumPrice: '۲۹۹,۰۰۰ تومان',
       platinumPeriod: ' / ماهیانه',
       platinumDesc: 'بیشترین آزادی عمل: نصف شدن ودیعه، ۱۰ روز مهلت رایگان و کرایه با نصف قیمت.',
       platinumB1: '۵۰٪ بیعانه امانی (۵۰٪ تخفیف ودیعه)',
@@ -252,6 +254,19 @@ const translations = {
       confirmTopup: 'تایید و پرداخت',
       topupSuccess: 'موجودی با موفقیت افزایش یافت.',
       topupFailed: 'شارژ کیف پول ناموفق بود. لطفاً مبلغ معتبری وارد کنید.',
+      upgradeModalTitle: 'ارتقای طرح اشتراک',
+      upgradeModalDesc: 'با انتخاب طرح‌های بالاتر، از کاهش ودیعه، روزهای کرایه رایگان بیشتر و تخفیف در کارمزد بهره‌مند شوید.',
+      currentPlanBadge: 'طرح فعلی شما',
+      selectPlanBtn: 'انتخاب طرح',
+      upgradeTo: 'ارتقا به',
+      freePlan: 'رایگان',
+      monthly: 'ماهیانه',
+      depositReduction: 'بیعانه امانی',
+      freeRentalDays: 'روز مهلت رایگان',
+      feeRate: 'ضریب هزینه کرایه',
+      upgradeSuccess: 'اشتراک شما با موفقیت ارتقا یافت!',
+      upgradeFailed: 'خطا در ارتقای اشتراک.',
+      insufficientFunds: 'موجودی کیف پول شما کافی نیست. لطفاً ابتدا کیف پول خود را شارژ کنید.',
     },
 
     // Cafe Dashboard
@@ -279,7 +294,7 @@ const translations = {
       addNewGameTitle: 'افزودن بازی جدید به قفسه کافه',
       gameTitle: 'نام بازی',
       publisher: 'ناشر',
-      retailPrice: 'قیمت فروشگاه (Retail MSRP)',
+      retailPrice: 'قیمت فروشگاه (تومان)',
       addGameBtn: 'افزودن بازی به موجودی',
       addGameSuccess: 'بازی با موفقیت به قفسه اضافه شد!',
       addGameFailed: 'خطا در افزودن بازی.',
@@ -324,6 +339,7 @@ const translations = {
   },
 
   en: {
+    currency: 'Toman',
     // Navbar
     nav: {
       brand: 'BoardGameX',
@@ -452,7 +468,7 @@ const translations = {
       badge: 'A Thriving Ecosystem',
       title: 'Built for Every Tabletop Lover',
       playerTitle: 'For Players & Groups',
-      playerDesc: 'Explore expensive new releases and legendary classics for weekend game nights without committing $100+ to purchase.',
+      playerDesc: 'Explore expensive new releases and legendary classics for weekend game nights without committing millions of Tomans to purchase.',
       playerB1: 'Free 3-10 day rental window on every game',
       playerB2: 'Instant wallet deposit release on safe drop-off',
       playerB3: 'Verified complete and pristine components',
@@ -485,7 +501,7 @@ const translations = {
 
       goldName: 'Gold',
       goldBadge: 'Most Popular',
-      goldPrice: '$14.99',
+      goldPrice: '149,000 Toman',
       goldPeriod: ' / month',
       goldDesc: 'Our recommended plan for regular game nights with substantial deposit discounts.',
       goldB1: '70% Deposit Hold (30% discount)',
@@ -496,7 +512,7 @@ const translations = {
 
       platinumName: 'Platinum',
       platinumBadge: 'Master Collector',
-      platinumPrice: '$29.99',
+      platinumPrice: '299,000 Toman',
       platinumPeriod: ' / month',
       platinumDesc: 'Maximum freedom: 50% deposit cuts, 10 free days, and half-price rental rates.',
       platinumB1: '50% Deposit Hold (50% discount)',
@@ -574,6 +590,19 @@ const translations = {
       confirmTopup: 'Confirm Top Up',
       topupSuccess: 'Top up successful.',
       topupFailed: 'Topup failed. Please enter a valid amount.',
+      upgradeModalTitle: 'Upgrade Subscription Plan',
+      upgradeModalDesc: 'Unlock lower security deposit holds, more free rental days, and discounts on rental fees.',
+      currentPlanBadge: 'Current Plan',
+      selectPlanBtn: 'Select Plan',
+      upgradeTo: 'Upgrade to',
+      freePlan: 'Free',
+      monthly: 'month',
+      depositReduction: 'Deposit Hold',
+      freeRentalDays: 'Free Days Included',
+      feeRate: 'Fee Multiplier',
+      upgradeSuccess: 'Subscription upgraded successfully!',
+      upgradeFailed: 'Failed to upgrade subscription.',
+      insufficientFunds: 'Insufficient wallet balance. Please top up your wallet first.',
     },
 
     // Cafe Dashboard
@@ -601,7 +630,7 @@ const translations = {
       addNewGameTitle: 'Add New Game to Hub Inventory',
       gameTitle: 'Game Title',
       publisher: 'Publisher',
-      retailPrice: 'Retail Price ($)',
+      retailPrice: 'Retail Price (Toman)',
       addGameBtn: 'Add to Inventory',
       addGameSuccess: 'Game added successfully!',
       addGameFailed: 'Failed to add game.',
@@ -674,7 +703,17 @@ export const LanguageProvider = ({ children }) => {
   const isRTL = language === 'fa';
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t, isRTL }}>
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
+        isRTL,
+        formatPrice,
+        formatCurrency: (val) => formatCurrency(val, language)
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );

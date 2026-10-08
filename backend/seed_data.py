@@ -57,17 +57,17 @@ def seed():
     renter.save()
     
     renter_profile = UserProfile.objects.create(user=renter)
-    renter_profile.wallet_balance = Decimal('200.00')
+    renter_profile.wallet_balance = Decimal('5000000.00')
     renter_profile.subscription_tier = gold_tier
     renter_profile.save()
 
     print("Creating Board Games & Inventory...")
     games_data = [
-        {'title': 'Catan', 'publisher': 'Kosmos', 'retail_price': Decimal('55.00')},
-        {'title': 'Ticket to Ride', 'publisher': 'Days of Wonder', 'retail_price': Decimal('50.00')},
-        {'title': 'Scythe', 'publisher': 'Stonemaier Games', 'retail_price': Decimal('85.00')},
-        {'title': 'Gloomhaven', 'publisher': 'Cephalofair Games', 'retail_price': Decimal('140.00')},
-        {'title': 'Wingspan', 'publisher': 'Stonemaier Games', 'retail_price': Decimal('60.00')},
+        {'title': 'Catan', 'publisher': 'Kosmos', 'retail_price': Decimal('1200000.00')},
+        {'title': 'Ticket to Ride', 'publisher': 'Days of Wonder', 'retail_price': Decimal('1800000.00')},
+        {'title': 'Scythe', 'publisher': 'Stonemaier Games', 'retail_price': Decimal('3200000.00')},
+        {'title': 'Gloomhaven', 'publisher': 'Cephalofair Games', 'retail_price': Decimal('4500000.00')},
+        {'title': 'Wingspan', 'publisher': 'Stonemaier Games', 'retail_price': Decimal('2200000.00')},
     ]
 
     games = []

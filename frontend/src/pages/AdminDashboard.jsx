@@ -6,7 +6,7 @@ import { Settings, Database, Store } from 'lucide-react';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, formatCurrency } = useLanguage();
   const [activeTab, setActiveTab] = useState('METRICS');
   const [metrics, setMetrics] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -91,11 +91,11 @@ const AdminDashboard = () => {
             </div>
             <div className="glass-panel p-6 rounded-2xl">
               <div className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">{t.adminDashboard.escrowLocked}</div>
-              <div className="text-4xl font-bold text-emerald-400">${metrics?.total_escrow_locked || '0.00'}</div>
+              <div className="text-4xl font-bold text-emerald-400">{formatCurrency(metrics?.total_escrow_locked || 0)}</div>
             </div>
             <div className="glass-panel p-6 rounded-2xl">
               <div className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">{t.adminDashboard.platformRevenue}</div>
-              <div className="text-4xl font-bold text-indigo-400">${metrics?.total_revenue_generated || '0.00'}</div>
+              <div className="text-4xl font-bold text-indigo-400">{formatCurrency(metrics?.total_revenue_generated || 0)}</div>
             </div>
             <div className="glass-panel p-6 rounded-2xl">
               <div className="text-slate-400 text-sm font-semibold uppercase tracking-wider mb-2">{t.adminDashboard.partnerHubs}</div>
@@ -157,7 +157,7 @@ const AdminDashboard = () => {
                       <td className="py-4 px-4 text-slate-400 text-sm font-mono">{tx.id}</td>
                       <td className="py-4 px-4 text-xs font-bold text-slate-300 uppercase">{tx.transaction_type}</td>
                       <td className={`py-4 px-4 font-bold ${parseFloat(tx.amount) > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {parseFloat(tx.amount) > 0 ? '+' : ''}{tx.amount}
+                        {parseFloat(tx.amount) > 0 ? '+' : ''}{formatCurrency(tx.amount)}
                       </td>
                       <td className="py-4 px-4 text-slate-200 text-sm">{tx.description}</td>
                       <td className="py-4 px-4 text-slate-400 text-sm whitespace-nowrap">{new Date(tx.timestamp).toLocaleString()}</td>

@@ -6,7 +6,7 @@ import { Store, PackageCheck, ClipboardCheck, ArrowLeftRight, Gamepad2, Plus } f
 
 const CafeDashboard = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, formatCurrency } = useLanguage();
   const [activeTab, setActiveTab] = useState('OPERATIONS');
   const [rentals, setRentals] = useState([]);
   const [inventory, setInventory] = useState([]);
@@ -108,7 +108,7 @@ const CafeDashboard = () => {
         </div>
         <div className="text-right">
           <div className="text-slate-400 text-sm">{t.cafeDashboard.hubBalance}</div>
-          <div className="text-3xl font-bold text-emerald-400">${user?.profile?.wallet_balance || '0.00'}</div>
+          <div className="text-3xl font-bold text-emerald-400">{formatCurrency(user?.profile?.wallet_balance || 0)}</div>
         </div>
       </div>
 
@@ -222,7 +222,7 @@ const CafeDashboard = () => {
                 </div>
                 <div>
                   <label className="block text-sm text-slate-300 mb-1">{t.cafeDashboard.retailPrice}</label>
-                  <input type="number" step="0.01" required value={newGame.retail_price} onChange={e => setNewGame({...newGame, retail_price: e.target.value})} className="glass-input w-full px-4 py-2 rounded-lg" />
+                  <input type="number" step="1000" min="1000" placeholder="1500000" required value={newGame.retail_price} onChange={e => setNewGame({...newGame, retail_price: e.target.value})} className="glass-input w-full px-4 py-2 rounded-lg" />
                 </div>
                 <button type="submit" className="glass-button w-full py-2.5 rounded-lg">{t.cafeDashboard.addGameBtn}</button>
               </form>
@@ -238,7 +238,7 @@ const CafeDashboard = () => {
                     </div>
                     <div>
                       <h4 className="font-bold text-white">{item.board_game.title}</h4>
-                      <p className="text-sm text-slate-400">${item.board_game.retail_price} | {item.is_damaged ? <span className="text-rose-400">Damaged</span> : <span className="text-emerald-400">Available</span>}</p>
+                      <p className="text-sm text-slate-400">{formatCurrency(item.board_game.retail_price)} | {item.is_damaged ? <span className="text-rose-400">Damaged</span> : <span className="text-emerald-400">Available</span>}</p>
                     </div>
                   </div>
                 ))}
@@ -269,7 +269,7 @@ const CafeDashboard = () => {
                     <tr key={tx.id} className="border-b border-slate-800 hover:bg-slate-800/30">
                       <td className="py-4 px-4 text-slate-300 text-sm whitespace-nowrap">{new Date(tx.timestamp).toLocaleDateString()}</td>
                       <td className="py-4 px-4 text-slate-200">{tx.description}</td>
-                      <td className="py-4 px-4 font-bold text-emerald-400">+${tx.amount}</td>
+                      <td className="py-4 px-4 font-bold text-emerald-400">+{formatCurrency(tx.amount)}</td>
                     </tr>
                   ))}
                   {revenueShares.length === 0 && (

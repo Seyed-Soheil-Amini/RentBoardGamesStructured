@@ -6,7 +6,7 @@ import { Wallet, LogOut, User, Gamepad2, LayoutDashboard, Globe } from 'lucide-r
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { language, toggleLanguage, t } = useLanguage();
+  const { language, toggleLanguage, t, formatCurrency } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -59,7 +59,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3 bg-slate-900/60 rounded-full py-1.5 px-3.5 border border-slate-700/50">
               <div className="flex items-center gap-1.5 text-emerald-400 font-medium text-xs sm:text-sm">
                 <Wallet className="w-3.5 h-3.5" />
-                <span>${user.profile?.wallet_balance || '0.00'}</span>
+                <span>{formatCurrency(user.profile?.wallet_balance || 0)}</span>
               </div>
               <div className="w-px h-3.5 bg-slate-700"></div>
               <div className="flex items-center gap-1.5 text-slate-300 text-xs">

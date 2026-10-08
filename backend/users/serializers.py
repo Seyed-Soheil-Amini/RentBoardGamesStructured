@@ -3,12 +3,26 @@ from django.contrib.auth import get_user_model
 from .models import UserProfile, SubscriptionTier
 from .models import UserProfile, SubscriptionTier, WalletTransaction
 
+from decimal import Decimal
+
 User = get_user_model()
 
+TIER_PRICES = {
+    'BASIC': Decimal('0.00'),
+    'GOLD': Decimal('149000.00'),
+    'PLATINUM': Decimal('299000.00'),
+}
+
 class SubscriptionTierSerializer(serializers.ModelSerializer):
+    price = serializers.SerializerMethodField()
+
     class Meta:
         model = SubscriptionTier
-        fields = ['id', 'name', 'deposit_percent', 'free_days', 'fee_multiplier']
+        fields = ['id', 'name', 'deposit_percent', 'free_days', 'fee_multiplier', 'price']
+
+    def get_price(self, obj):
+        name_key = (obj.name or '').upper()
+        return str(TIER_PRICES.get(name_key, Decimal('0.00')))
 
 class WalletTransactionSerializer(serializers.ModelSerializer):
     class Meta:
