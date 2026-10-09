@@ -97,6 +97,52 @@ class HandoverRentalView(APIView):
         
         return Response({"message": "Handed over successfully", "due_date": rental.due_date}, status=status.HTTP_200_OK)
 
+class CancelRentalView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request, pk):
+        rental = get_object_or_404(Rental, pk=pk)
+        
+        if rental.renter != request.user:
+            return Response(
+                {"error": "Not authorized. You can only cancel your own rental reservations."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        if rental.status != 'RESERVED':
+            return Response(
+                {"error": "Only reserved rentals can be cancelled before pickup."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        renter_profile = rental.renter.profile
+        deposit = rental.deposit_amount
+        
+        # Release escrow funds back to renter wallet balance
+        renter_profile.escrow_balance -= deposit
+        renter_profile.wallet_balance += deposit
+        renter_profile.save()
+        
+        # Record transaction in wallet history
+        WalletTransaction.objects.create(
+            user=rental.renter,
+            amount=deposit,
+            transaction_type='DEPOSIT_RELEASE',
+            description=f"Deposit refunded for cancelled reservation of {rental.inventory_item.board_game.title} (#{rental.id})"
+        )
+        
+        rental.status = 'CANCELLED'
+        rental.save()
+        
+        return Response({
+            "message": "Rental reservation cancelled successfully",
+            "rental_id": rental.id,
+            "deposit_refunded": str(deposit),
+            "new_wallet_balance": str(renter_profile.wallet_balance),
+            "new_escrow_balance": str(renter_profile.escrow_balance)
+        }, status=status.HTTP_200_OK)
+
 class ReturnRentalView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

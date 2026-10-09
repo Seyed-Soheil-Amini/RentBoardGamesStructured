@@ -70,7 +70,7 @@ The database uses SQLite managed through Django ORM. Below are the key models an
 - `deposit_amount`: DecimalField(10, 2)
 - `rent_fee_charged`: DecimalField(10, 2)
 - `late_fee_charged`: DecimalField(10, 2)
-- `status`: CharField (`REQUESTED`, `PICKED_UP`, `RETURNED_SAFE`, `RETURNED_DAMAGED`)
+- `status`: CharField (`RESERVED`, `PICKED_UP`, `RETURNED_SAFE`, `RETURNED_DAMAGED`, `CANCELLED`)
 - `pickup_date`: DateTimeField(null=True)
 - `due_date`: DateTimeField(null=True)
 - `return_date`: DateTimeField(null=True)

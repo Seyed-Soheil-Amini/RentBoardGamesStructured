@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Wallet, Package, Clock, ShieldCheck, Gamepad2, MapPin, CheckCircle, AlertTriangle, Sparkles, Check, Crown, Zap } from 'lucide-react';
+import { Wallet, Package, Clock, ShieldCheck, Gamepad2, MapPin, CheckCircle, AlertTriangle, Sparkles, Check, Crown, Zap, XCircle } from 'lucide-react';
 
 const UserDashboard = () => {
   const { user, refreshWallet } = useAuth();
@@ -13,6 +13,7 @@ const UserDashboard = () => {
   const [topupAmount, setTopupAmount] = useState('');
   const [isTopupModalOpen, setIsTopupModalOpen] = useState(false);
   const [cityFilter, setCityFilter] = useState('');
+  const [cancellingId, setCancellingId] = useState(null);
 
   // Plan Upgrade state
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
@@ -109,12 +110,35 @@ const UserDashboard = () => {
     }
   };
 
+  const handleCancelRental = async (rentalId, depositAmount, gameTitle) => {
+    const confirmMsg = t.userDashboard.cancelConfirmPrompt
+      .replace('{title}', gameTitle)
+      .replace('{deposit}', formatCurrency(depositAmount));
+    if (!window.confirm(confirmMsg)) return;
+
+    setCancellingId(rentalId);
+    try {
+      await axios.post(`/api/rentals/${rentalId}/cancel/`);
+      alert(t.userDashboard.cancelSuccess);
+      await Promise.all([
+        fetchRentals(),
+        fetchInventory(),
+        refreshWallet()
+      ]);
+    } catch (error) {
+      console.error('Failed to cancel rental', error);
+      alert(error.response?.data?.error || t.userDashboard.cancelFailed);
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
   const filteredInventory = inventory.filter(item => 
     item.cafe.city.toLowerCase().includes(cityFilter.toLowerCase())
   );
 
   const activeRentals = rentals.filter(r => ['RESERVED', 'PICKED_UP'].includes(r.status));
-  const historyRentals = rentals.filter(r => ['RETURNED_SAFE', 'RETURNED_DAMAGED'].includes(r.status));
+  const historyRentals = rentals.filter(r => ['RETURNED_SAFE', 'RETURNED_DAMAGED', 'CANCELLED'].includes(r.status));
 
   const tabList = [
     { id: 'CATALOG', label: t.userDashboard.tabs.catalog },
@@ -287,6 +311,20 @@ const UserDashboard = () => {
                       #{rental.id.toString().padStart(4, '0')}
                     </div>
                   </div>
+
+                  {rental.status === 'RESERVED' && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => handleCancelRental(rental.id, rental.deposit_amount, rental.inventory_item.board_game.title)}
+                        disabled={cancellingId === rental.id}
+                        className="px-4 py-2 text-sm font-medium text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 rounded-xl transition-all duration-200 flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-sm hover:shadow-rose-500/10"
+                        title={t.userDashboard.cancelBooking}
+                      >
+                        <XCircle className="w-4 h-4 text-rose-400" />
+                        <span>{cancellingId === rental.id ? t.userDashboard.cancelling : t.userDashboard.cancelBooking}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -307,21 +345,43 @@ const UserDashboard = () => {
                 <div>
                   <h4 className="text-lg font-bold text-white mb-1">{rental.inventory_item.board_game.title}</h4>
                   <p className="text-sm text-slate-400">
-                    {t.userDashboard.returnedOn} {new Date(rental.return_date).toLocaleDateString()}
+                    {rental.return_date ? `${t.userDashboard.returnedOn} ${new Date(rental.return_date).toLocaleDateString()}` : t.userDashboard.cancelledBeforePickup}
                   </p>
                 </div>
                 
                 <div className="flex items-center gap-6">
-                  <div className="text-right">
-                    <div className="text-sm text-slate-300">{t.userDashboard.baseFee} {formatCurrency(rental.rent_fee_charged)}</div>
-                    {parseFloat(rental.late_fee_charged) > 0 && (
-                      <div className="text-sm text-rose-400">{t.userDashboard.lateFee} {formatCurrency(rental.late_fee_charged)}</div>
-                    )}
-                  </div>
+                  {rental.status !== 'CANCELLED' ? (
+                    <div className="text-right">
+                      <div className="text-sm text-slate-300">{t.userDashboard.baseFee} {formatCurrency(rental.rent_fee_charged)}</div>
+                      {parseFloat(rental.late_fee_charged) > 0 && (
+                        <div className="text-sm text-rose-400">{t.userDashboard.lateFee} {formatCurrency(rental.late_fee_charged)}</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <div className="text-sm text-emerald-400 font-medium">
+                        {t.userDashboard.depositRefunded}: {formatCurrency(rental.deposit_amount)}
+                      </div>
+                    </div>
+                  )}
                   
-                  <div className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${rental.status === 'RETURNED_SAFE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                    {rental.status === 'RETURNED_SAFE' ? <CheckCircle className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
-                    <span>{rental.status === 'RETURNED_SAFE' ? t.userDashboard.returnedSafe : t.userDashboard.returnedDamaged}</span>
+                  <div className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                    rental.status === 'RETURNED_SAFE' 
+                      ? 'bg-emerald-500/20 text-emerald-400' 
+                      : rental.status === 'RETURNED_DAMAGED' 
+                        ? 'bg-rose-500/20 text-rose-400' 
+                        : 'bg-slate-700/40 text-slate-400 border border-slate-600/30'
+                  }`}>
+                    {rental.status === 'RETURNED_SAFE' && <CheckCircle className="w-5 h-5" />}
+                    {rental.status === 'RETURNED_DAMAGED' && <AlertTriangle className="w-5 h-5" />}
+                    {rental.status === 'CANCELLED' && <XCircle className="w-5 h-5 text-slate-400" />}
+                    <span>
+                      {rental.status === 'RETURNED_SAFE' 
+                        ? t.userDashboard.returnedSafe 
+                        : rental.status === 'RETURNED_DAMAGED' 
+                          ? t.userDashboard.returnedDamaged 
+                          : t.userDashboard.cancelled}
+                    </span>
                   </div>
                 </div>
               </div>

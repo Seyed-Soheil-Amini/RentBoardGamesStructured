@@ -33,6 +33,7 @@
 
 ## 3. Domain Events
 - `RentalRequested`: Triggers deposit calculation and wallet escrow lock.
+- `RentalCancelled`: Releases escrow deposit back to renter's wallet before physical pickup; frees inventory item.
 - `RentalHandedOver`: Marks item as checked out and sets exact `due_date`.
 - `RentalReturnedIntact`: Computes base rent fee + late fee, settles escrow, releases remaining deposit, and credits cafe revenue share.
 - `RentalReturnedDamaged`: Executes 100% full game cost charge to user wallet, releases escrow, and flags item as damaged.

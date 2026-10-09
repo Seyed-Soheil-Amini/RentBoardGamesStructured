@@ -8,6 +8,7 @@ class Rental(models.Model):
         ('PICKED_UP', 'Picked Up'),
         ('RETURNED_SAFE', 'Returned Safe'),
         ('RETURNED_DAMAGED', 'Returned Damaged'),
+        ('CANCELLED', 'Cancelled'),
     )
 
     renter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='rentals')
